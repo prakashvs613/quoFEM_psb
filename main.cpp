@@ -52,8 +52,9 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #include <WorkflowCLI.h>
 #include <GoogleAnalytics.h>
 #include <TapisV3.h>
-#include <QtWebEngine>
+//#include <QtWebEngine>
 #include <Utils/FileOperations.h>
+#include <Utils/SimCenterConfigFile.h>
 
 
  // customMessgaeOutput code from web:
@@ -138,7 +139,7 @@ int main(int argc, char *argv[])
   //
 
   QApplication app(argc, argv);
-  QtWebEngine::initialize();
+  //QtWebEngine::initialize();
 
     //
     // create a remote interface
@@ -230,31 +231,51 @@ int main(int argc, char *argv[])
   }
 
   //Setting Google Analytics Tracking Information
+  QString configOptionAnalytics = getConfigOptionString("GoogleAnalytics");
+  
 #ifdef _SC_RELEASE
 
   qDebug() << "Running a Release Version of quoFEM";  
-  //Setting Google Analytics Tracking Information
-  GoogleAnalytics::SetMeasurementId("G-7P3PV7SM6J");
-  GoogleAnalytics::SetAPISecret("UxuZgMQaS7aoqpQskrcG9w");
-  GoogleAnalytics::CreateSessionId();
-  GoogleAnalytics::StartSession();
 
-  // Opening a QWebEngineView and using github to get app geographic usage
-  QWebEngineView view;
-  view.setUrl(QUrl("https://nheri-simcenter.github.io/quoFEM/GA4.html"));
-  view.resize(1024, 750);
-  view.show();
-  view.hide();
+  if (configOptionAnalytics != "No") {
+
+    qDebug() << "Google Analytics: None";
+    GoogleAnalytics::SetMeasurementId("G-7P3PV7SM6J");
+    GoogleAnalytics::SetAPISecret("UxuZgMQaS7aoqpQskrcG9w");
+    GoogleAnalytics::CreateSessionId();
+    GoogleAnalytics::StartSession();
+
+    qDebug() << "Google Analytics: Started";    
+
+    // Opening a QWebEngineView and using github to get app geographic usage
+    QWebEngineView view;
+    view.setUrl(QUrl("https://nheri-simcenter.github.io/quoFEM/GA4.html"));
+    view.resize(1024, 750);
+    view.show();
+    view.hide();
+
+  } else 
+
+    qDebug() << "Google Analytics: None";
+
+  
 #endif
 
 #ifdef _ANALYTICS
 
   //Setting Google Analytics Tracking Information
-  qDebug() << "compiled with: ANALYTICS";  
-  GoogleAnalytics::SetMeasurementId("G-7P3PV7SM6J");
-  GoogleAnalytics::SetAPISecret("UxuZgMQaS7aoqpQskrcG9w");
-  GoogleAnalytics::CreateSessionId();
-  GoogleAnalytics::StartSession();
+  if (analyticsOption != "No") {
+    
+    qDebug() << "compiled with: ANALYTICS";  
+    GoogleAnalytics::SetMeasurementId("G-7P3PV7SM6J");
+    GoogleAnalytics::SetAPISecret("UxuZgMQaS7aoqpQskrcG9w");
+    GoogleAnalytics::CreateSessionId();
+    GoogleAnalytics::StartSession();
+
+    qDebug() << "Google Analytics: Started";        
+    
+  } else
+    qDebug() << "Google Analytics: None";                  
   
 #endif
   
@@ -265,7 +286,8 @@ int main(int argc, char *argv[])
   int res = app.exec();
 
 #ifdef _GA_AFTER
-  
+
+  if (analyticsOption != "No") {    
     qDebug() << "compiled with: _GA_AFTER";  
     // Opening a QWebEngineView and using github to get app geographic usage
     QWebEngineView view;
@@ -273,6 +295,7 @@ int main(int argc, char *argv[])
     view.resize(1024, 750);
     view.show();
     view.hide();
+  }
     
 #endif  
   
